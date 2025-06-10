@@ -358,14 +358,21 @@
       }
 
       function update() {
+        if (
+          !joyActive &&
+          (stick.style.left !== "28%" || stick.style.top !== "28%")
+        ) {
+          stick.style.left = "28%";
+          stick.style.top = "28%";
+        }
         if (running) {
           // 移动
-          let baseSpeed = 2.6 * (canvas.width / WIDTH); // 降低最大速度上限
+          let baseSpeed = 2.6 * (canvas.width / WIDTH); // 固定最大速度
           let dx, dy;
           if (isMobile && moveDir._amp) {
-            // 摇杆幅度控制速度
-            dx = moveDir._vx * baseSpeed * moveDir._amp * 1.0; // 降低系数
-            dy = moveDir._vy * baseSpeed * moveDir._amp * 1.0;
+            // 只取方向，速度恒定最大值
+            dx = moveDir._vx * baseSpeed;
+            dy = moveDir._vy * baseSpeed;
             player.move(dx, dy);
           } else {
             dx = (moveDir.right ? 1 : 0) - (moveDir.left ? 1 : 0);
@@ -444,43 +451,45 @@
         moveDir._vx = 0;
         moveDir._vy = 0;
       });
-      joystick.addEventListener("touchmove", (e) => {
-        if (!joyActive) return;
-        let t = e.touches[0];
-        let dx = t.clientX - joyCenter.x,
-          dy = t.clientY - joyCenter.y;
-        let len = Math.sqrt(dx * dx + dy * dy);
-        let maxLen = joyRadius * 0.72; // stick活动范围，不能超出底座圆
-        if (len > maxLen) {
-          dx = (dx * maxLen) / len;
-          dy = (dy * maxLen) / len;
-          len = maxLen;
-        }
-        // stick位置（百分比，居中）
-        let stickOffset = 0.28; // 28%为中心
-        let px = 28 + (dx / joyRadius) * 28;
-        let py = 28 + (dy / joyRadius) * 28;
-        stick.style.left = px + "%";
-        stick.style.top = py + "%";
-        // 方向和速度幅度
-        let amp = len / maxLen; // 0~1
-        let vx = dx / maxLen;
-        let vy = dy / maxLen;
-        // 速度线性映射，amp越大速度越快
-        let threshold = 0.12; // 死区
-        moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
-        if (amp > threshold) {
-          // 方向分量
-          moveDir.left = vx < -threshold ? Math.abs(vx) * amp : 0;
-          moveDir.right = vx > threshold ? Math.abs(vx) * amp : 0;
-          moveDir.up = vy < -threshold ? Math.abs(vy) * amp : 0;
-          moveDir.down = vy > threshold ? Math.abs(vy) * amp : 0;
-        }
-        // 记录幅度，主循环用
-        moveDir._amp = amp;
-        moveDir._vx = vx;
-        moveDir._vy = vy;
-      });
+      joystick.addEventListener(
+        "touchmove",
+        (e) => {
+          e.preventDefault(); // 阻止默认滚动
+          if (!joyActive) return;
+          let t = e.touches[0];
+          let dx = t.clientX - joyCenter.x,
+            dy = t.clientY - joyCenter.y;
+          let len = Math.sqrt(dx * dx + dy * dy);
+          let maxLen = joyRadius * 0.72; // stick活动范围，不能超出底座圆
+          if (len > maxLen) {
+            dx = (dx * maxLen) / len;
+            dy = (dy * maxLen) / len;
+            len = maxLen;
+          }
+          // stick位置（百分比，居中）
+          let px = 28 + (dx / joyRadius) * 28;
+          let py = 28 + (dy / joyRadius) * 28;
+          stick.style.left = px + "%";
+          stick.style.top = py + "%";
+          // 方向
+          let vx = dx / maxLen;
+          let vy = dy / maxLen;
+          let threshold = 0.12; // 死区
+          moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
+          let amp = len / maxLen;
+          if (amp > threshold) {
+            // 方向分量
+            moveDir._vx = vx;
+            moveDir._vy = vy;
+            moveDir._amp = amp;
+          } else {
+            moveDir._vx = 0;
+            moveDir._vy = 0;
+            moveDir._amp = 0;
+          }
+        },
+        { passive: false }
+      );
       joystick.addEventListener("touchend", (e) => {
         joyActive = false;
         stick.style.left = "28%";
