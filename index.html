@@ -16,6 +16,10 @@
         width: 100%;
         background: #111;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
       }
       #gameCanvas {
         display: block;
@@ -23,6 +27,8 @@
         background: #000;
         border: 2px solid #333;
         touch-action: none;
+        /* 让canvas有阴影更突出 */
+        box-shadow: 0 4px 24px #000a;
       }
       #scoreLabel {
         position: absolute;
@@ -49,38 +55,41 @@
         box-shadow: 0 2px 8px #0008;
         cursor: pointer;
       }
-      /* 虚拟摇杆 */
+      /* 虚拟摇杆优化：更大更居中 */
       #joystick {
-        position: absolute;
-        left: 4vw;
-        bottom: 4vw;
-        width: 22vw;
-        height: 22vw;
-        min-width: 100px;
-        min-height: 100px;
-        max-width: 180px;
-        max-height: 180px;
+        position: fixed;
+        left: 50%;
+        bottom: 7vw;
+        transform: translateX(-50%);
+        width: 38vw;
+        height: 38vw;
+        min-width: 120px;
+        min-height: 120px;
+        max-width: 260px;
+        max-height: 260px;
         z-index: 20;
         display: none;
+        /* 让摇杆更明显 */
+        pointer-events: auto;
       }
       #joystick-base {
         width: 100%;
         height: 100%;
-        background: #4448;
+        background: #444b;
         border-radius: 50%;
         position: absolute;
         left: 0;
         top: 0;
       }
       #joystick-stick {
-        width: 44%;
-        height: 44%;
-        background: #fff8;
+        width: 54%;
+        height: 54%;
+        background: #fff9;
         border-radius: 50%;
         position: absolute;
-        left: 28%;
-        top: 28%;
-        box-shadow: 0 2px 8px #0008;
+        left: 23%;
+        top: 23%;
+        box-shadow: 0 2px 12px #000a;
         touch-action: none;
       }
       @media (max-width: 700px) {
