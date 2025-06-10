@@ -278,6 +278,18 @@
         lastBallTime = Date.now();
         restartBtn.style.display = "none";
         scoreLabel.textContent = "得分: 0";
+        // 复活时摇杆stick回中心，重新计算中心和半径
+        if (isMobile) {
+          setTimeout(() => {
+            updateJoystickCenter();
+            stick.style.left = "28%";
+            stick.style.top = "28%";
+            moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
+            moveDir._amp = 0;
+            moveDir._vx = 0;
+            moveDir._vy = 0;
+          }, 50);
+        }
       }
       resetGame();
 
@@ -348,12 +360,12 @@
       function update() {
         if (running) {
           // 移动
-          let baseSpeed = 4 * (canvas.width / WIDTH);
+          let baseSpeed = 2.6 * (canvas.width / WIDTH); // 降低最大速度上限
           let dx, dy;
           if (isMobile && moveDir._amp) {
             // 摇杆幅度控制速度
-            dx = moveDir._vx * baseSpeed * moveDir._amp * 1.2;
-            dy = moveDir._vy * baseSpeed * moveDir._amp * 1.2;
+            dx = moveDir._vx * baseSpeed * moveDir._amp * 1.0; // 降低系数
+            dy = moveDir._vy * baseSpeed * moveDir._amp * 1.0;
             player.move(dx, dy);
           } else {
             dx = (moveDir.right ? 1 : 0) - (moveDir.left ? 1 : 0);
@@ -427,6 +439,10 @@
         // stick回到中心
         stick.style.left = "28%";
         stick.style.top = "28%";
+        moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
+        moveDir._amp = 0;
+        moveDir._vx = 0;
+        moveDir._vy = 0;
       });
       joystick.addEventListener("touchmove", (e) => {
         if (!joyActive) return;
