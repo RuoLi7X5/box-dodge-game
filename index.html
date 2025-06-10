@@ -61,15 +61,14 @@
         left: 50%;
         bottom: 7vw;
         transform: translateX(-50%);
-        width: 38vw;
-        height: 38vw;
-        min-width: 120px;
-        min-height: 120px;
-        max-width: 260px;
-        max-height: 260px;
+        width: 48vw;
+        height: 48vw;
+        min-width: 160px;
+        min-height: 160px;
+        max-width: 340px;
+        max-height: 340px;
         z-index: 20;
         display: none;
-        /* 让摇杆更明显 */
         pointer-events: auto;
       }
       #joystick-base {
@@ -82,15 +81,16 @@
         top: 0;
       }
       #joystick-stick {
-        width: 54%;
-        height: 54%;
+        width: 44%;
+        height: 44%;
         background: #fff9;
         border-radius: 50%;
         position: absolute;
-        left: 23%;
-        top: 23%;
+        left: 28%;
+        top: 28%;
         box-shadow: 0 2px 12px #000a;
         touch-action: none;
+        transition: left 0.08s, top 0.08s;
       }
       @media (max-width: 700px) {
         #gameCanvas {
@@ -348,12 +348,20 @@
       function update() {
         if (running) {
           // 移动
-          let speed = 4 * (canvas.width / WIDTH);
-          let dx = (moveDir.right ? 1 : 0) - (moveDir.left ? 1 : 0);
-          let dy = (moveDir.down ? 1 : 0) - (moveDir.up ? 1 : 0);
-          if (dx || dy) {
-            let len = Math.sqrt(dx * dx + dy * dy) || 1;
-            player.move((dx * speed) / len, (dy * speed) / len);
+          let baseSpeed = 4 * (canvas.width / WIDTH);
+          let dx, dy;
+          if (isMobile && moveDir._amp) {
+            // 摇杆幅度控制速度
+            dx = moveDir._vx * baseSpeed * moveDir._amp * 1.2;
+            dy = moveDir._vy * baseSpeed * moveDir._amp * 1.2;
+            player.move(dx, dy);
+          } else {
+            dx = (moveDir.right ? 1 : 0) - (moveDir.left ? 1 : 0);
+            dy = (moveDir.down ? 1 : 0) - (moveDir.up ? 1 : 0);
+            if (dx || dy) {
+              let len = Math.sqrt(dx * dx + dy * dy) || 1;
+              player.move((dx * baseSpeed) / len, (dy * baseSpeed) / len);
+            }
           }
           // 小球
           balls.forEach((b) => b.move());
@@ -400,38 +408,71 @@
 
       // 触屏虚拟摇杆
       let joyActive = false,
-        joyStart = { x: 0, y: 0 };
+        joyStart = { x: 0, y: 0 },
+        joyCenter = { x: 0, y: 0 },
+        joyRadius = 0;
+      // 初始化摇杆中心和半径
+      function updateJoystickCenter() {
+        const rect = joystick.getBoundingClientRect();
+        joyCenter.x = rect.left + rect.width / 2;
+        joyCenter.y = rect.top + rect.height / 2;
+        joyRadius = rect.width / 2;
+      }
+      window.addEventListener("resize", updateJoystickCenter);
+      setTimeout(updateJoystickCenter, 300); // 初始加载
       joystick.addEventListener("touchstart", (e) => {
+        updateJoystickCenter();
         joyActive = true;
         let t = e.touches[0];
-        joyStart = { x: t.clientX, y: t.clientY };
-        stick.style.left = "25px";
-        stick.style.top = "25px";
+        // stick回到中心
+        stick.style.left = "28%";
+        stick.style.top = "28%";
       });
       joystick.addEventListener("touchmove", (e) => {
         if (!joyActive) return;
         let t = e.touches[0];
-        let dx = t.clientX - joyStart.x,
-          dy = t.clientY - joyStart.y;
+        let dx = t.clientX - joyCenter.x,
+          dy = t.clientY - joyCenter.y;
         let len = Math.sqrt(dx * dx + dy * dy);
-        let maxLen = 35;
+        let maxLen = joyRadius * 0.72; // stick活动范围，不能超出底座圆
         if (len > maxLen) {
           dx = (dx * maxLen) / len;
           dy = (dy * maxLen) / len;
+          len = maxLen;
         }
-        stick.style.left = 25 + dx + "px";
-        stick.style.top = 25 + dy + "px";
-        // 方向
-        moveDir.left = dx < -10 ? 1 : 0;
-        moveDir.right = dx > 10 ? 1 : 0;
-        moveDir.up = dy < -10 ? 1 : 0;
-        moveDir.down = dy > 10 ? 1 : 0;
+        // stick位置（百分比，居中）
+        let stickOffset = 0.28; // 28%为中心
+        let px = 28 + (dx / joyRadius) * 28;
+        let py = 28 + (dy / joyRadius) * 28;
+        stick.style.left = px + "%";
+        stick.style.top = py + "%";
+        // 方向和速度幅度
+        let amp = len / maxLen; // 0~1
+        let vx = dx / maxLen;
+        let vy = dy / maxLen;
+        // 速度线性映射，amp越大速度越快
+        let threshold = 0.12; // 死区
+        moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
+        if (amp > threshold) {
+          // 方向分量
+          moveDir.left = vx < -threshold ? Math.abs(vx) * amp : 0;
+          moveDir.right = vx > threshold ? Math.abs(vx) * amp : 0;
+          moveDir.up = vy < -threshold ? Math.abs(vy) * amp : 0;
+          moveDir.down = vy > threshold ? Math.abs(vy) * amp : 0;
+        }
+        // 记录幅度，主循环用
+        moveDir._amp = amp;
+        moveDir._vx = vx;
+        moveDir._vy = vy;
       });
       joystick.addEventListener("touchend", (e) => {
         joyActive = false;
-        stick.style.left = "25px";
-        stick.style.top = "25px";
+        stick.style.left = "28%";
+        stick.style.top = "28%";
         moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
+        moveDir._amp = 0;
+        moveDir._vx = 0;
+        moveDir._vy = 0;
       });
 
       // 按钮重开
