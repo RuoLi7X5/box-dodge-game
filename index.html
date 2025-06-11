@@ -274,7 +274,15 @@
         balls = [];
         score = 0;
         running = true;
-        moveDir = { left: 0, right: 0, up: 0, down: 0 };
+        moveDir = {
+          left: 0,
+          right: 0,
+          up: 0,
+          down: 0,
+          _amp: 0,
+          _vx: 0,
+          _vy: 0,
+        };
         lastBallTime = Date.now();
         restartBtn.style.display = "none";
         scoreLabel.textContent = "得分: 0";
