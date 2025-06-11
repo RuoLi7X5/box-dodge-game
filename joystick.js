@@ -57,19 +57,21 @@ export function setupJoystick() {
         dy = (dy * maxLen) / len;
         len = maxLen;
       }
+      // stick位置（百分比，居中）
       let px = 28 + (dx / joyRadius) * 28;
       let py = 28 + (dy / joyRadius) * 28;
       stick.style.left = px + "%";
       stick.style.top = py + "%";
-      let vx = dx / maxLen;
-      let vy = dy / maxLen;
-      let threshold = 0.12;
+      // 只要手指移动方向变，立即响应方向
+      let vx = dx;
+      let vy = dy;
+      let vlen = Math.sqrt(vx * vx + vy * vy);
+      let threshold = 0.12 * joyRadius; // 死区
       moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
-      let amp = len / maxLen;
-      if (amp > threshold) {
-        moveDir._vx = vx;
-        moveDir._vy = vy;
-        moveDir._amp = amp;
+      if (vlen > threshold) {
+        moveDir._vx = vx / vlen;
+        moveDir._vy = vy / vlen;
+        moveDir._amp = len / maxLen;
       } else {
         moveDir._vx = 0;
         moveDir._vy = 0;
