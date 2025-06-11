@@ -49,12 +49,12 @@ body {
   left: 50%;
   bottom: 7vw;
   transform: translateX(-50%);
-  width: 48vw;
-  height: 48vw;
-  min-width: 160px;
-  min-height: 160px;
-  max-width: 340px;
-  max-height: 340px;
+  width: 34vw; /* 底座更大 */
+  height: 34vw;
+  min-width: 100px;
+  min-height: 100px;
+  max-width: 200px;
+  max-height: 200px;
   z-index: 20;
   display: none;
   pointer-events: auto;
@@ -71,16 +71,17 @@ body {
   border: 2.5px solid #fff5;
 }
 #joystick-stick {
-  width: 44%;
-  height: 44%;
+  width: 36%; /* 摇杆更小 */
+  height: 36%;
   background: radial-gradient(circle at 60% 40%, #fff 80%, #bbb 100%);
   border-radius: 50%;
   position: absolute;
-  left: 28%;
-  top: 28%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   box-shadow: 0 2px 12px #000a, 0 0 0 2px #00bfff99;
   touch-action: none;
-  transition: left 0.08s, top 0.08s;
+  transition: none;
   border: 2.5px solid #00bfffcc;
 }
 @media (max-width: 700px) {

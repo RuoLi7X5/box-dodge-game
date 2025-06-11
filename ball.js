@@ -46,17 +46,15 @@ export class Ball {
         this.vy = -BALL_SPEED;
       }
     }
-    let scale = canvas.width / WIDTH;
-    this.vx *= scale;
-    this.vy *= scale;
+    // 速度已由 main.js 传入，单位为“每秒画布宽度的百分比”
   }
   static randomColor() {
     let arr = ["red", "orange", "yellow", "lime", "cyan", "blue", "magenta"];
     return arr[Math.floor(Math.random() * arr.length)];
   }
-  move() {
-    this.x += this.vx;
-    this.y += this.vy;
+  move(delta) {
+    this.x += this.vx * delta;
+    this.y += this.vy * delta;
   }
   draw(ctx, canvas, WIDTH, BALL_SIZE) {
     let size = (BALL_SIZE * canvas.width) / WIDTH;

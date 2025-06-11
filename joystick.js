@@ -35,8 +35,10 @@ export function setupJoystick() {
   joystick.addEventListener("touchstart", (e) => {
     updateJoystickCenter();
     joyActive = true;
-    stick.style.left = "28%";
-    stick.style.top = "28%";
+    // 复位到中心
+    stick.style.left = "50%";
+    stick.style.top = "50%";
+    stick.style.transform = "translate(-50%, -50%)";
     moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
     moveDir._amp = 0;
     moveDir._vx = 0;
@@ -58,10 +60,11 @@ export function setupJoystick() {
         len = maxLen;
       }
       // stick位置（百分比，居中）
-      let px = 28 + (dx / joyRadius) * 28;
-      let py = 28 + (dy / joyRadius) * 28;
+      let px = 50 + (dx / joyRadius) * 36; // 36%为摇杆半径
+      let py = 50 + (dy / joyRadius) * 36;
       stick.style.left = px + "%";
       stick.style.top = py + "%";
+      stick.style.transform = "translate(-50%, -50%)";
       // 只要手指移动方向变，立即响应方向
       let vx = dx;
       let vy = dy;
@@ -82,8 +85,10 @@ export function setupJoystick() {
   );
   joystick.addEventListener("touchend", (e) => {
     joyActive = false;
-    stick.style.left = "28%";
-    stick.style.top = "28%";
+    // 复位到中心
+    stick.style.left = "50%";
+    stick.style.top = "50%";
+    stick.style.transform = "translate(-50%, -50%)";
     moveDir.left = moveDir.right = moveDir.up = moveDir.down = 0;
     moveDir._amp = 0;
     moveDir._vx = 0;

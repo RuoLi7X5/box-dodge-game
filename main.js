@@ -7,7 +7,14 @@ const WIDTH = 500,
   HEIGHT = 400,
   PLAYER_SIZE = 20,
   BALL_SIZE = 16,
-  BALL_SPEED = 4,
+  // 速度参数改为“每秒移动画布宽度的百分比”
+  PLAYER_SPEED_RATIO_BASE = 0.22,
+  BALL_SPEED_RATIO_BASE = 0.18,
+  // 速度倍率，后续可暴露给用户控制
+  PLAYER_SPEED_MULTIPLIER = 2.5, // 方块速度倍率
+  BALL_SPEED_MULTIPLIER = 4,   // 小球速度倍率
+  PLAYER_SPEED_RATIO = PLAYER_SPEED_RATIO_BASE * PLAYER_SPEED_MULTIPLIER,
+  BALL_SPEED_RATIO = BALL_SPEED_RATIO_BASE * BALL_SPEED_MULTIPLIER,
   BALL_INTERVAL = 900;
 
 let canvas, ctx, scoreLabel, restartBtn, joystick, stick, startBtn;
@@ -56,9 +63,10 @@ function resetGame() {
 function spawnBall() {
   if (!running) return;
   let r = Math.random();
+  let ballSpeed = canvas.width * BALL_SPEED_RATIO;
   if (r < 0.5) {
     let dir = ["left", "right", "top", "bottom"][Math.floor(Math.random() * 4)];
-    balls.push(new Ball(dir, canvas, WIDTH, BALL_SIZE, BALL_SPEED));
+    balls.push(new Ball(dir, canvas, WIDTH, BALL_SIZE, ballSpeed));
   } else {
     let edge = ["left", "right", "top", "bottom"][
       Math.floor(Math.random() * 4)
@@ -80,10 +88,10 @@ function spawnBall() {
     let dx = player.x - x,
       dy = player.y - y;
     let dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1e-6);
-    let vx = ((BALL_SPEED * dx) / dist) * (canvas.width / WIDTH);
-    let vy = ((BALL_SPEED * dy) / dist) * (canvas.width / WIDTH);
+    let vx = (ballSpeed * dx) / dist;
+    let vy = (ballSpeed * dy) / dist;
     balls.push(
-      new Ball("custom", canvas, WIDTH, BALL_SIZE, BALL_SPEED, vx, vy, x, y)
+      new Ball("custom", canvas, WIDTH, BALL_SIZE, ballSpeed, vx, vy, x, y)
     );
   }
 }
@@ -116,19 +124,22 @@ function draw() {
   }
 }
 
+let lastTime = performance.now();
+
 function update() {
+  let now = performance.now();
+  let delta = (now - lastTime) / 1000; // 秒
+  lastTime = now;
   if (running) {
-    // 电脑端和手机端基准速度分别为绝对恒定值
-    const PC_BASE_SPEED = 1.5;
-    const MOBILE_BASE_SPEED = 1.5;
-    let baseSpeed = isMobile ? MOBILE_BASE_SPEED : PC_BASE_SPEED;
-    let dx, dy;
+    // 速度单位：画布宽度百分比/秒
+    let baseSpeed = canvas.width * PLAYER_SPEED_RATIO;
+    let dx = 0,
+      dy = 0;
     if (isMobile && moveDir._amp) {
-      // 保证方向速度一致：归一化方向向量
       let len =
         Math.sqrt(moveDir._vx * moveDir._vx + moveDir._vy * moveDir._vy) || 1;
-      dx = (moveDir._vx / len) * baseSpeed;
-      dy = (moveDir._vy / len) * baseSpeed;
+      dx = (moveDir._vx / len) * baseSpeed * delta;
+      dy = (moveDir._vy / len) * baseSpeed * delta;
       player.move(dx, dy, canvas, WIDTH, PLAYER_SIZE);
     } else {
       dx = (moveDir.right ? 1 : 0) - (moveDir.left ? 1 : 0);
@@ -136,15 +147,15 @@ function update() {
       if (dx || dy) {
         let len = Math.sqrt(dx * dx + dy * dy) || 1;
         player.move(
-          (dx * baseSpeed) / len,
-          (dy * baseSpeed) / len,
+          (dx * baseSpeed * delta) / len,
+          (dy * baseSpeed * delta) / len,
           canvas,
           WIDTH,
           PLAYER_SIZE
         );
       }
     }
-    balls.forEach((b) => b.move());
+    balls.forEach((b) => b.move(delta));
     balls = balls.filter((b) => !b.isOut(canvas, WIDTH, BALL_SIZE));
     for (let b of balls) {
       if (
