@@ -117,24 +117,21 @@ function draw() {
 
 function update() {
   if (running) {
-    let baseSpeed = 2.6 * (canvas.width / WIDTH);
+    // 速度增加5%
+    let baseSpeed = 2.6 * 1.05 * (canvas.width / WIDTH);
     let dx, dy;
     if (isMobile && moveDir._amp) {
-      dx = moveDir._vx * baseSpeed;
-      dy = moveDir._vy * baseSpeed;
+      // 保证方向速度一致：归一化方向向量
+      let len = Math.sqrt(moveDir._vx * moveDir._vx + moveDir._vy * moveDir._vy) || 1;
+      dx = (moveDir._vx / len) * baseSpeed;
+      dy = (moveDir._vy / len) * baseSpeed;
       player.move(dx, dy, canvas, WIDTH, PLAYER_SIZE);
     } else {
       dx = (moveDir.right ? 1 : 0) - (moveDir.left ? 1 : 0);
       dy = (moveDir.down ? 1 : 0) - (moveDir.up ? 1 : 0);
       if (dx || dy) {
         let len = Math.sqrt(dx * dx + dy * dy) || 1;
-        player.move(
-          (dx * baseSpeed) / len,
-          (dy * baseSpeed) / len,
-          canvas,
-          WIDTH,
-          PLAYER_SIZE
-        );
+        player.move((dx * baseSpeed) / len, (dy * baseSpeed) / len, canvas, WIDTH, PLAYER_SIZE);
       }
     }
     balls.forEach((b) => b.move());
