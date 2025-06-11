@@ -118,8 +118,10 @@ function draw() {
 
 function update() {
   if (running) {
-    // 速度增加5%
-    let baseSpeed = 2.6 * 1.05 * (canvas.width / WIDTH);
+    // 电脑端和手机端基准速度分别为绝对恒定值
+    const PC_BASE_SPEED = 1.5;
+    const MOBILE_BASE_SPEED = 1.5;
+    let baseSpeed = isMobile ? MOBILE_BASE_SPEED : PC_BASE_SPEED;
     let dx, dy;
     if (isMobile && moveDir._amp) {
       // 保证方向速度一致：归一化方向向量
