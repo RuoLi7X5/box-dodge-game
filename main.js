@@ -199,7 +199,9 @@ window.onload = function () {
     canvas.style.display = "block";
     scoreLabel.style.display = "block";
     restartBtn.style.display = "none";
-    resizeCanvas();
+    joystick.style.display = isMobile ? "block" : "none";
+    // 立即重置并启动游戏
+    resetGame();
     window.addEventListener("resize", resizeCanvas);
     setupEvents();
     update();
