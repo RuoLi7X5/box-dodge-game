@@ -206,4 +206,20 @@ window.onload = function () {
     setupEvents();
     update();
   };
+  // 保证PC端也能隐藏按钮
+  if (!isMobile) {
+    joystick.style.display = "none";
+    startBtn.style.display = "block";
+    // 监听PC端点击
+    startBtn.addEventListener("click", function () {
+      startBtn.style.display = "none";
+      canvas.style.display = "block";
+      scoreLabel.style.display = "block";
+      restartBtn.style.display = "none";
+      resetGame();
+      window.addEventListener("resize", resizeCanvas);
+      setupEvents();
+      update();
+    });
+  }
 };
