@@ -10,7 +10,7 @@ const WIDTH = 500,
   BALL_SPEED = 4,
   BALL_INTERVAL = 900;
 
-let canvas, ctx, scoreLabel, restartBtn, joystick, stick;
+let canvas, ctx, scoreLabel, restartBtn, joystick, stick, startBtn;
 let player, balls, score, running, moveDir, lastBallTime;
 let isMobile;
 
@@ -21,6 +21,7 @@ function getDom() {
   restartBtn = document.getElementById("restartBtn");
   joystick = document.getElementById("joystick");
   stick = document.getElementById("joystick-stick");
+  startBtn = document.getElementById("startBtn");
 }
 
 function resizeCanvas() {
@@ -122,7 +123,8 @@ function update() {
     let dx, dy;
     if (isMobile && moveDir._amp) {
       // 保证方向速度一致：归一化方向向量
-      let len = Math.sqrt(moveDir._vx * moveDir._vx + moveDir._vy * moveDir._vy) || 1;
+      let len =
+        Math.sqrt(moveDir._vx * moveDir._vx + moveDir._vy * moveDir._vy) || 1;
       dx = (moveDir._vx / len) * baseSpeed;
       dy = (moveDir._vy / len) * baseSpeed;
       player.move(dx, dy, canvas, WIDTH, PLAYER_SIZE);
@@ -131,7 +133,13 @@ function update() {
       dy = (moveDir.down ? 1 : 0) - (moveDir.up ? 1 : 0);
       if (dx || dy) {
         let len = Math.sqrt(dx * dx + dy * dy) || 1;
-        player.move((dx * baseSpeed) / len, (dy * baseSpeed) / len, canvas, WIDTH, PLAYER_SIZE);
+        player.move(
+          (dx * baseSpeed) / len,
+          (dy * baseSpeed) / len,
+          canvas,
+          WIDTH,
+          PLAYER_SIZE
+        );
       }
     }
     balls.forEach((b) => b.move());
@@ -180,8 +188,20 @@ window.onload = function () {
   getDom();
   isMobile = isMobileDevice();
   setupJoystick(moveDir);
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
-  setupEvents();
-  update();
+  // 初始只显示开始按钮
+  canvas.style.display = "none";
+  scoreLabel.style.display = "none";
+  restartBtn.style.display = "none";
+  joystick.style.display = isMobile ? "block" : "none";
+  startBtn.style.display = "block";
+  startBtn.onclick = function () {
+    startBtn.style.display = "none";
+    canvas.style.display = "block";
+    scoreLabel.style.display = "block";
+    restartBtn.style.display = "none";
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    setupEvents();
+    update();
+  };
 };
