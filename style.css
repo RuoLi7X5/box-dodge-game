@@ -95,3 +95,18 @@ body {
     display: block;
   }
 }
+@media (orientation: landscape) and (max-width: 900px) {
+  #joystick {
+    left: 3vw;
+    bottom: 10vh;
+    top: auto;
+    right: auto;
+    transform: none;
+    width: 28vw;
+    height: 28vw;
+    min-width: 80px;
+    min-height: 80px;
+    max-width: 160px;
+    max-height: 160px;
+  }
+}

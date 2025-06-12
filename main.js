@@ -11,8 +11,8 @@ const WIDTH = 500,
   PLAYER_SPEED_RATIO_BASE = 0.22,
   BALL_SPEED_RATIO_BASE = 0.18,
   // 速度倍率，后续可暴露给用户控制
-  PLAYER_SPEED_MULTIPLIER = 2, // 方块速度倍率
-  BALL_SPEED_MULTIPLIER = 4,   // 小球速度倍率
+  PLAYER_SPEED_MULTIPLIER = 2.5, // 方块速度倍率
+  BALL_SPEED_MULTIPLIER = 4, // 小球速度倍率
   PLAYER_SPEED_RATIO = PLAYER_SPEED_RATIO_BASE * PLAYER_SPEED_MULTIPLIER,
   BALL_SPEED_RATIO = BALL_SPEED_RATIO_BASE * BALL_SPEED_MULTIPLIER,
   BALL_INTERVAL = 900;
@@ -201,6 +201,87 @@ window.onload = function () {
   getDom();
   isMobile = isMobileDevice();
   setupJoystick(moveDir);
+  // 设置按钮逻辑
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPanel = document.getElementById("settingsPanel");
+  const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+  const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+  const joystickPos = document.getElementById("joystickPos");
+  const joystickSize = document.getElementById("joystickSize");
+  settingsBtn.onclick = () => (settingsPanel.style.display = "block");
+  closeSettingsBtn.onclick = () => (settingsPanel.style.display = "none");
+  saveSettingsBtn.onclick = () => {
+    // 位置
+    const pos = joystickPos.value;
+    const js = document.getElementById("joystick");
+    js.style.left = "";
+    js.style.right = "";
+    js.style.bottom = "";
+    js.style.top = "";
+    js.style.transform = "";
+    if (pos === "left") {
+      js.style.left = "3vw";
+      js.style.right = "auto";
+      js.style.bottom = "10vh";
+      js.style.top = "auto";
+      js.style.transform = "none";
+    } else if (pos === "right") {
+      js.style.left = "auto";
+      js.style.right = "3vw";
+      js.style.bottom = "10vh";
+      js.style.top = "auto";
+      js.style.transform = "none";
+    } else {
+      js.style.left = "50%";
+      js.style.right = "auto";
+      js.style.bottom = "7vw";
+      js.style.top = "auto";
+      js.style.transform = "translateX(-50%)";
+    }
+    // 大小
+    if (joystickSize.value === "small") {
+      js.style.width = "20vw";
+      js.style.height = "20vw";
+      js.style.minWidth = "60px";
+      js.style.minHeight = "60px";
+      js.style.maxWidth = "100px";
+      js.style.maxHeight = "100px";
+    } else if (joystickSize.value === "large") {
+      js.style.width = "40vw";
+      js.style.height = "40vw";
+      js.style.minWidth = "120px";
+      js.style.minHeight = "120px";
+      js.style.maxWidth = "240px";
+      js.style.maxHeight = "240px";
+    } else {
+      js.style.width = "28vw";
+      js.style.height = "28vw";
+      js.style.minWidth = "80px";
+      js.style.minHeight = "80px";
+      js.style.maxWidth = "160px";
+      js.style.maxHeight = "160px";
+    }
+    // 屏幕方向
+    const orientation = document.getElementById("screenOrientation").value;
+    if (orientation === "landscape") {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch(() => {});
+      }
+      // 兼容部分浏览器
+      document.body.requestFullscreen && document.body.requestFullscreen();
+    } else if (orientation === "portrait") {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("portrait").catch(() => {});
+      }
+      document.body.requestFullscreen && document.body.requestFullscreen();
+    } else {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+      }
+      document.exitFullscreen && document.exitFullscreen();
+    }
+    settingsPanel.style.display = "none";
+  };
   // 初始只显示开始按钮
   canvas.style.display = "none";
   scoreLabel.style.display = "none";
